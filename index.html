@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Savings Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 text-gray-900">
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+    <h1 class="text-2xl font-bold mb-4">💰 Savings Manager</h1>
+    <form id="savings-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <input id="month" name="month" class="border p-2 rounded" readonly>
+      <input id="date" name="date" class="border p-2 rounded" readonly>
+      <input id="savings" name="savings" type="number" placeholder="Savings" class="border p-2 rounded">
+      <input id="profit" name="profit" type="number" placeholder="Profit" class="border p-2 rounded">
+      <input id="withdraw" name="withdraw" type="number" placeholder="Withdraw" class="border p-2 rounded">
+      <input id="loan" name="loan" type="number" placeholder="Loan" class="border p-2 rounded">
+      <input id="instalment" name="instalment" type="number" placeholder="Instalment" class="border p-2 rounded">
+      <input id="instalment_no" name="instalment_no" type="number" placeholder="Instalment No." class="border p-2 rounded">
+      <input id="receive_date" name="receive_date" type="date" class="border p-2 rounded">
+      <input id="receiver" name="receiver" type="text" placeholder="Receiver" class="border p-2 rounded">
+      <input id="message" name="message" type="text" placeholder="Message" class="border p-2 rounded">
+      <input id="total" name="total" type="number" placeholder="Total" class="border p-2 rounded bg-gray-100" readonly>
+      <input id="instalment_due" name="instalment_due" type="number" placeholder="Instalment Due" class="border p-2 rounded bg-gray-100" readonly>
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded col-span-1 md:col-span-3">Save</button>
+    </form>
+
+    <div class="mt-8">
+      <h2 class="text-xl font-bold mb-2">📋 Records</h2>
+      <div id="records" class="overflow-x-auto">
+        <table class="w-full table-auto border">
+          <thead class="bg-gray-200">
+            <tr id="table-head"></tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'YOUR_WEB_APP_URL'; // replace with your deployed Apps Script Web App URL
+
+    const form = document.getElementById('savings-form');
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
+
+    document.getElementById('month').value = now.toLocaleString('en-US', { month: 'long' });
+    document.getElementById('date').value = now.toISOString().split("T")[0];
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      formData.append('method', 'create');
+
+      const data = Object.fromEntries(formData.entries());
+      const query = new URLSearchParams(data);
+
+      await fetch(API_URL, { method: 'POST', body: query });
+      form.reset();
+      loadData();
+    });
+
+    async function loadData() {
+      const res = await fetch(`${API_URL}?method=read`);
+      const data = await res.json();
+      const head = document.getElementById('table-head');
+      const body = document.getElementById('table-body');
+      head.innerHTML = '';
+      body.innerHTML = '';
+
+      if (data.length) {
+        Object.keys(data[0]).forEach(k => {
+          head.innerHTML += `<th class="border px-2 py-1">${k}</th>`;
+        });
+
+        data.forEach(row => {
+          const tr = document.createElement('tr');
+          Object.values(row).forEach(val => {
+            tr.innerHTML += `<td class="border px-2 py-1">${val}</td>`;
+          });
+          body.appendChild(tr);
+        });
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
