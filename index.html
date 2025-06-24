@@ -1,91 +1,713 @@
-<!DOCTYPE html>
-<html lang="en" class="bg-gray-100">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Savings Manager</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="p-6 text-gray-900">
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-    <h1 class="text-2xl font-bold mb-4">💰 Savings Manager</h1>
-    <form id="savings-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <input id="month" name="month" class="border p-2 rounded" readonly>
-      <input id="date" name="date" class="border p-2 rounded" readonly>
-      <input id="savings" name="savings" type="number" placeholder="Savings" class="border p-2 rounded">
-      <input id="profit" name="profit" type="number" placeholder="Profit" class="border p-2 rounded">
-      <input id="withdraw" name="withdraw" type="number" placeholder="Withdraw" class="border p-2 rounded">
-      <input id="loan" name="loan" type="number" placeholder="Loan" class="border p-2 rounded">
-      <input id="instalment" name="instalment" type="number" placeholder="Instalment" class="border p-2 rounded">
-      <input id="instalment_no" name="instalment_no" type="number" placeholder="Instalment No." class="border p-2 rounded">
-      <input id="receive_date" name="receive_date" type="date" class="border p-2 rounded">
-      <input id="receiver" name="receiver" type="text" placeholder="Receiver" class="border p-2 rounded">
-      <input id="message" name="message" type="text" placeholder="Message" class="border p-2 rounded">
-      <input id="total" name="total" type="number" placeholder="Total" class="border p-2 rounded bg-gray-100" readonly>
-      <input id="instalment_due" name="instalment_due" type="number" placeholder="Instalment Due" class="border p-2 rounded bg-gray-100" readonly>
-      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded col-span-1 md:col-span-3">Save</button>
-    </form>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Savings Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    <div class="mt-8">
-      <h2 class="text-xl font-bold mb-2">📋 Records</h2>
-      <div id="records" class="overflow-x-auto">
-        <table class="w-full table-auto border">
-          <thead class="bg-gray-200">
-            <tr id="table-head"></tr>
-          </thead>
-          <tbody id="table-body"></tbody>
-        </table>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #f9fafb;
+        color: #333;
+        line-height: 1.5;
+      }
+
+      header {
+        background: #2c3e50;
+        color: #fff;
+        padding: 1rem;
+        text-align: center;
+        font-size: 1.5rem;
+      }
+
+      .container {
+        /* max-width: 1100px; */
+        max-width: 1151px;
+        margin: 2rem auto;
+        padding: 1rem;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      }
+
+      form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      form input,
+      form select {
+        flex: 1 1 180px;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      form button {
+        background: #2ecc71;
+        color: #fff;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 4px;
+        cursor: pointer;
+        flex: 1 1 120px;
+      }
+
+      form button:hover {
+        background: #27ae60;
+      }
+
+      /*search bar style*/
+      .search-bar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+      }
+
+      .search-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 250px;
+      }
+
+      .search-wrapper input {
+        width: 100%;
+        padding: 0.5rem 2rem 0.5rem 0.5rem;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+
+      .clear-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1rem;
+        color: #888;
+        cursor: pointer;
+        user-select: none;
+        display: none;
+        transition: color 0.3s;
+      }
+
+      .clear-btn:hover {
+        color: #333;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        min-width: 800px;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      th,
+      td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        font-size: 0.95rem;
+        white-space: nowrap;
+      }
+
+      th {
+        background: #f4f6f8;
+        font-weight: 600;
+      }
+
+      tr:hover {
+        background: #f1f1f1;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.3rem;
+      }
+
+      .actions button {
+        padding: 0.4rem 0.7rem;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+
+      .edit {
+        background: #3498db;
+        color: #fff;
+      }
+
+      .delete {
+        background: #e74c3c;
+        color: #fff;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .close-btn {
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #aaa;
+      }
+
+      .close-btn:hover {
+        color: #333;
+      }
+
+      @media (max-width: 768px) {
+        form {
+          flex-direction: column;
+        }
+
+        .search-bar {
+          justify-content: center;
+        }
+
+        table {
+          font-size: 0.85rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="loginBox"
+      style="
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <h2 style="text-align: center; margin-bottom: 1rem">Login</h2>
+      <input
+        type="text"
+        id="username"
+        placeholder="Username"
+        style="
+          width: 100%;
+          margin-bottom: 1rem;
+          padding: 0.5rem;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+        "
+      />
+      <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        style="
+          width: 100%;
+          margin-bottom: 1rem;
+          padding: 0.5rem;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+        "
+      />
+      <button
+        onclick="login()"
+        style="
+          width: 100%;
+          padding: 0.6rem;
+          background: #2ecc71;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        "
+      >
+        Login
+      </button>
+      <p
+        id="loginMessage"
+        style="color: red; text-align: center; margin-top: 0.5rem"
+      ></p>
+    </div>
+
+    <div id="mainContent" style="display: none">
+      <!-- your original page content here (starting from <header>...) -->
+
+      <header>💰 Savings Manager</header>
+
+      <!-- <button onclick="logout()">Logout</button> -->
+      <button
+        id="logoutBtn"
+        onclick="logout()"
+        class="fixed top-4 right-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300"
+      >
+        Logout
+      </button>
+
+      <div class="container">
+        <h2>Add / Edit Entry</h2>
+        <form id="entryForm">
+          <input type="hidden" name="ID" />
+          <select name="Month" id="monthSelect" required>
+            <option value="">Select Month</option>
+            <option>January</option>
+            <option>February</option>
+            <option>March</option>
+            <option>April</option>
+            <option>May</option>
+            <option>June</option>
+            <option>July</option>
+            <option>August</option>
+            <option>September</option>
+            <option>October</option>
+            <option>November</option>
+            <option>December</option>
+          </select>
+          <input type="number" name="Savings" placeholder="Savings" required />
+          <input type="number" name="Profit" placeholder="Profit" />
+          <input type="number" name="Withdraw" placeholder="Withdraw" />
+          <input type="number" name="Total" placeholder="Total" readonly />
+          <input type="number" name="Loan" placeholder="Loan" />
+          <input type="number" name="Instalment" placeholder="Instalment" />
+          <input
+            type="number"
+            name="Instalment_No"
+            placeholder="Instalment No"
+          />
+          <input
+            type="number"
+            name="Instalment_Due"
+            placeholder="Instalment Due"
+            readonly
+          />
+          <input
+            type="date"
+            name="Receive_Date"
+            id="receiveDate"
+            placeholder="Receive Date"
+          />
+          <input type="text" name="Receiver" placeholder="Receiver" />
+          <input type="text" name="Message" placeholder="Message" />
+          <button type="submit">Submit</button>
+        </form>
+
+        <div class="search-bar">
+          <div class="search-wrapper">
+            <input type="text" id="search" placeholder="Search..." />
+            <span class="clear-btn" id="clearSearch">&times;</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Sav.</th>
+                <th>Prof.</th>
+                <th>With.</th>
+                <th>Total</th>
+                <th>Loan</th>
+                <th>Inst.</th>
+                <th>Inst.No</th>
+                <th>Due</th>
+                <th>Rec.Date</th>
+                <th>Receiver</th>
+                <th>Msg.</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    const API_URL = 'YOUR_WEB_APP_URL'; // replace with your deployed Apps Script Web App URL
+    <script>
 
-    const form = document.getElementById('savings-form');
-    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
+      // window.onload = function () {
+      //   if (localStorage.getItem("loggedIn") === "true") {
+      //     showDashboard(); // Show the dashboard or main app
+      //   } else {
+      //     showLogin(); // Show the login form
+      //   }
+      // };
 
-    document.getElementById('month').value = now.toLocaleString('en-US', { month: 'long' });
-    document.getElementById('date').value = now.toISOString().split("T")[0];
+      const url =
+        "https://script.google.com/macros/s/AKfycbwznF9uoiwoK9ZBC8N-d16VtOFaGbnaE_VxfXYEsh2l7H00eUMx9C78UPXD3eDyAquq/exec";
+      let dataList = [];
+      const form = document.getElementById("entryForm");
+      const tbody = document.querySelector("tbody");
+      const search = document.getElementById("search");
 
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-      formData.append('method', 'create');
-
-      const data = Object.fromEntries(formData.entries());
-      const query = new URLSearchParams(data);
-
-      await fetch(API_URL, { method: 'POST', body: query });
-      form.reset();
-      loadData();
-    });
-
-    async function loadData() {
-      const res = await fetch(`${API_URL}?method=read`);
-      const data = await res.json();
-      const head = document.getElementById('table-head');
-      const body = document.getElementById('table-body');
-      head.innerHTML = '';
-      body.innerHTML = '';
-
-      if (data.length) {
-        Object.keys(data[0]).forEach(k => {
-          head.innerHTML += `<th class="border px-2 py-1">${k}</th>`;
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const params = new URLSearchParams({
+          action: formData.get("ID") ? "update" : "create",
         });
-
-        data.forEach(row => {
-          const tr = document.createElement('tr');
-          Object.values(row).forEach(val => {
-            tr.innerHTML += `<td class="border px-2 py-1">${val}</td>`;
-          });
-          body.appendChild(tr);
+        for (const pair of formData.entries()) params.append(pair[0], pair[1]);
+        fetch(url, { method: "POST", body: params }).then(() => {
+          load();
+          form.reset();
         });
+      });
+
+      ["Loan", "Instalment", "Instalment_No"].forEach((name) => {
+        form[name].addEventListener("input", calculateDue);
+      });
+
+      ["Savings", "Profit", "Withdraw"].forEach((name) => {
+        form[name].addEventListener("input", calculateTotal);
+      });
+
+      // function toDateInputValue(dateString) {
+      //   const date = new Date(dateString);
+      //   const offset = date.getTimezoneOffset();
+      //   date.setMinutes(date.getMinutes() - offset);
+      //   return date.toISOString().split("T")[0];
+      // }
+
+      function toDateInputValue(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-CA"); // returns "YYYY-MM-DD"
       }
-    }
 
-    loadData();
-  </script>
-</body>
+      /*function formatDateForInput(dateString) {
+        const date = new Date(dateString);
+        const timezoneOffset = date.getTimezoneOffset();
+        date.setMinutes(date.getMinutes() - timezoneOffset);
+        return date.toISOString().split("T")[0];
+      }
+
+      // Simulated data from Google Sheets
+      const record = {
+        Receive_Date: "2025-06-20T00:00:00.000Z",
+      };
+
+      // Show the correct date in the input
+      // document.getElementById("receiveDateInput").value = formatDateForInput(
+      document.getElementById("receiveDate").value = formatDateForInput(
+        record.Receive_Date
+      );*/
+
+      function formatDateForServer(inputDateStr) {
+        const date = new Date(inputDateStr);
+        const offsetMs = date.getTimezoneOffset() * 60000;
+        const localDate = new Date(date.getTime() - offsetMs);
+        return localDate.toISOString().split("T")[0]; // Returns 'yyyy-MM-dd'
+      }
+
+      function load() {
+        fetch(url + "?action=read")
+          .then((r) => {
+            console.log("Status:", r.status);
+            return r.json();
+          })
+          .then((d) => {
+            console.log("Fetched data:", d);
+            dataList = d;
+            render(d);
+          })
+          .catch((err) => {
+            console.error("Load failed:", err);
+            alert("Failed to load data. See console.");
+          });
+      }
+
+      function render(list) {
+        const kw = search.value.toLowerCase();
+        tbody.innerHTML = "";
+        list
+          .filter((r) =>
+            Object.values(r).some((v) => ("" + v).toLowerCase().includes(kw))
+          )
+          .forEach((r) => {
+            // Parse numbers safely
+            const loan = parseFloat(r.Loan) || 0;
+            const inst = parseFloat(r.Instalment) || 0;
+            const instNo = parseFloat(r.Instalment_No) || 0;
+
+            // Only calculate due if both values are empty or > 0
+            let due = "";
+            if (
+              (inst > 0 || r.Instalment === "") &&
+              (instNo > 0 || r.Instalment_No === "")
+            ) {
+              due = (loan - inst * instNo).toFixed(2);
+            }
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${r.Month}</td><td>${r.Savings}</td><td>${r.Profit}</td>
+        <td>${r.Withdraw}</td><td>${r.Total}</td><td>${r.Loan}</td>
+        <td>${r.Instalment}</td><td>${r.Instalment_No}</td><td>${due}</td>
+        <td>${r.Receive_Date}</td><td>${r.Receiver}</td><td>${r.Message}</td>
+        <td class="actions">
+          <button class="edit" onclick="startEdit('${r.ID}')">Edit</button>
+          <button class="delete" onclick="remove('${r.ID}')">Delete</button>
+        </td>`;
+            tbody.appendChild(tr);
+          });
+      }
+
+      // function startEdit(id) {
+      //   const rec = dataList.find((x) => x.ID === id);
+      //   Object.keys(rec).forEach((k) => {
+      //     const el = form.elements[k];
+      //     if (el) el.value = rec[k];
+      //   });
+      //   calculateDue(); // Recalculate after filling
+      //   calculateTotal();
+      //   window.scrollTo({ top: 0, behavior: "smooth" });
+      // }
+
+      function startEdit(id) {
+        const rec = dataList.find((x) => x.ID === id);
+        Object.keys(rec).forEach((k) => {
+          const el = form.elements[k];
+          if (el) {
+            if (k === "Receive_Date" && rec[k]) {
+              const formattedDate = formatToISODate(rec[k]); // format properly
+              el.value = formattedDate;
+            } else {
+              el.value = rec[k];
+            }
+          }
+        });
+        calculateDue();
+        calculateTotal();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function formatToISODate(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return ""; // invalid date
+        return d.toISOString().split("T")[0]; // get YYYY-MM-DD
+      }
+
+      function calculateDue() {
+        const loan = parseFloat(form.Loan.value) || 0;
+        const inst = parseFloat(form.Instalment.value) || 0;
+        const instNo = parseFloat(form.Instalment_No.value) || 0;
+
+        if (
+          (form.Instalment.value === "" || inst > 0) &&
+          (form.Instalment_No.value === "" || instNo > 0)
+        ) {
+          form.Instalment_Due.value = (loan - inst * instNo).toFixed(2);
+        } else {
+          form.Instalment_Due.value = "";
+        }
+      }
+
+      function calculateTotal() {
+        const savings = parseFloat(form.Savings.value) || 0;
+        const profit = parseFloat(form.Profit.value) || 0;
+        const withdraw = parseFloat(form.Withdraw.value) || 0;
+
+        // Get previous total from last entry (skip current editing one)
+        let prevTotal = 0;
+        if (dataList.length > 0) {
+          const currentID = form.ID.value;
+          const prevEntry = [...dataList]
+            .reverse()
+            .find((d) => d.ID !== currentID);
+          if (prevEntry && !isNaN(parseFloat(prevEntry.Total))) {
+            prevTotal = parseFloat(prevEntry.Total);
+          }
+        }
+
+        form.Total.value = (savings + profit + prevTotal - withdraw).toFixed(2);
+      }
+
+      function remove(id) {
+        if (!confirm("Delete entry?")) return;
+        const p = new URLSearchParams({ action: "delete", ID: id });
+        fetch(url, { method: "POST", body: p }).then(load);
+      }
+
+      /*window.addEventListener("DOMContentLoaded", () => {
+        const monthSelect = document.getElementById("monthSelect");
+        const currentMonthIndex = new Date().getMonth(); // 0 = Jan, 11 = Dec
+        const monthNames = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        monthSelect.value = monthNames[currentMonthIndex];
+      });*/
+
+      window.addEventListener("DOMContentLoaded", () => {
+        // Set default month
+        const monthSelect = document.getElementById("monthSelect");
+        const currentMonthIndex = new Date().getMonth();
+        const monthNames = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        monthSelect.value = monthNames[currentMonthIndex];
+
+        // Set today's date in Receive_Date field
+        const dateInput = document.getElementById("receiveDate");
+        const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
+        dateInput.value = today;
+      });
+
+      const clearBtn = document.getElementById("clearSearch");
+
+      search.addEventListener("input", () => {
+        render(dataList);
+        clearBtn.style.display = search.value ? "block" : "none";
+      });
+
+      clearBtn.addEventListener("click", () => {
+        search.value = "";
+        clearBtn.style.display = "none";
+        render(dataList);
+      });
+
+      const loginScriptURL =
+        "https://script.google.com/macros/s/AKfycbw8SfafPzKoRz2K6BMj8h0YTtnw5y32U27_O4aO-UGD4-nVFWCSwTTLojYDj3Pxl25S4g/exec";
+
+      /*function login() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("loginMessage");
+
+  if (!username || !password) {
+    msg.textContent = "Username and password required.";
+    return;
+  }
+
+  const data = new URLSearchParams();
+  data.append("username", username);
+  data.append("password", password);
+
+  fetch(loginScriptURL, {
+    method: "POST",
+    body: data
+  })
+    .then(res => res.json())
+    .then(response => {
+      if (response.success) {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+        load(); // optional: load data after login
+      } else {
+        msg.textContent = "Invalid username or password.";
+      }
+    })
+    .catch(() => {
+      msg.textContent = "Login failed. Try again.";
+    });
+}*/
+
+      search.addEventListener("input", () => render(dataList));
+      window.addEventListener("load", load);
+
+      // Show appropriate screen on page load
+      window.onload = function () {
+        if (localStorage.getItem("loggedIn") === "true") {
+          showDashboard();
+        } else {
+          showLogin();
+        }
+      };
+
+      // Login logic
+      function login() {
+        const u = document.getElementById("username").value.trim();
+        const p = document.getElementById("password").value.trim();
+        const msg = document.getElementById("loginMessage");
+
+        fetch(loginScriptURL, {
+          method: "POST",
+          body: new URLSearchParams({ username: u, password: p }),
+        })
+          .then((res) => res.json())
+          .then((resp) => {
+            if (resp.success) {
+              localStorage.setItem("loggedIn", "true");
+              showDashboard();
+            } else {
+              msg.textContent = "Invalid username or password.";
+            }
+          })
+          .catch(() => (msg.textContent = "Login failed. Try again."));
+      }
+
+      // Logout logic
+      function logout() {
+        localStorage.removeItem("loggedIn");
+        showLogin();
+      }
+
+      // Show login screen
+      function showLogin() {
+        document.getElementById("loginBox").style.display = "block";
+        document.getElementById("mainContent").style.display = "none";
+      }
+
+      // Show dashboard screen & load data
+      function showDashboard() {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+        load();
+      }
+    </script>
+  </body>
 </html>
