@@ -68,7 +68,7 @@
         name="instalment_due"
         placeholder="Instalment Due"
         class="p-2 border bg-gray-100"
-        disabled
+        readonly
       />
       <input
         type="date"
@@ -133,7 +133,7 @@
 
     <script>
       const scriptURL =
-        "https://script.google.com/macros/s/AKfycbwsqgOT1OBk2HJYmsRQ_NyK4nl6XrOrALhViBAG7fRWYEAV8xTOnK5kvfOqy3byjBsOew/exec";
+        "https://script.google.com/macros/s/AKfycbyHzHUEp6b_j0QMnsIQTLO_UPH2QH4DpkZ1b3yajlmiya3QI9WnfDP4308xO2JwYkgABA/exec";
 
       const form = document.getElementById("savings-form");
       const table = document.getElementById("data-table");
@@ -183,10 +183,10 @@
           const t = window.lastTotal || 0;
           total.value = (t + s + p - w).toFixed(2);
 
-          const l = parseFloat(loan.value) || 0;
           const i = parseFloat(inst.value) || 0;
           const n = parseInt(instNo.value) || 0;
-          instDue.value = (i * n - (window.lastLoan || 0)).toFixed(2);
+          const lastLoan = window.lastLoan || 0;
+          instDue.value = (window.lastLoan - i * n).toFixed(2);
         });
       });
 
@@ -247,7 +247,14 @@
         if (data.length) {
           const last = data[data.length - 1];
           window.lastTotal = parseFloat(last.total) || 0;
-          window.lastLoan = parseFloat(last.loan) || 0;
+
+          // Find the last non-zero loan
+          const lastNonZeroLoanRow = [...data]
+            .reverse()
+            .find((row) => parseFloat(row.loan) > 0);
+          window.lastLoan = lastNonZeroLoanRow
+            ? parseFloat(lastNonZeroLoanRow.loan)
+            : 0;
         } else {
           window.lastTotal = 0;
           window.lastLoan = 0;
@@ -273,12 +280,11 @@
       }
       // Date format
       function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d)) return ""; // fallback for invalid dates
-  const offset = d.getTime() + 6 * 60 * 60 * 1000; // Add GMT+6
-  return new Date(offset).toISOString().split("T")[0];
-}
-
+        const d = new Date(dateStr);
+        if (isNaN(d)) return ""; // fallback for invalid dates
+        const offset = d.getTime() + 6 * 60 * 60 * 1000; // Add GMT+6
+        return new Date(offset).toISOString().split("T")[0];
+      }
 
       // Delete
       function deleteRow(id) {
