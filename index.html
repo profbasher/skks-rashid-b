@@ -11,87 +11,144 @@
 
     <!-- Form -->
     <form id="savings-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <select name="month" id="month" class="p-2 border" required></select>
+      <!-- Month Input (Text) -->
       <input
-        type="number"
-        id="savings"
-        name="savings"
-        placeholder="Savings"
-        class="p-2 border"
+        type="text"
+        id="month"
+        name="month"
+        placeholder="Month (e.g., June 2025)"
+        pattern="^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$"
+        title="Enter month and year (e.g., June 2025)"
+        class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        required
       />
-      <input
-        type="number"
-        id="profit"
-        name="profit"
-        placeholder="Profit"
-        class="p-2 border"
-      />
-      <input
-        type="number"
-        id="withdraw"
-        name="withdraw"
-        placeholder="Withdraw"
-        class="p-2 border"
-      />
+
+      <!-- Savings Input -->
+      <div class="flex flex-col col-span-1">
+        <input
+          type="number"
+          id="savings"
+          name="savings"
+          placeholder="Savings"
+          class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p id="savings-in-words" class="text-xs text-blue-600 italic mt-1"></p>
+      </div>
+
+      <!-- Profit Input -->
+      <div class="flex flex-col col-span-1">
+        <input
+          type="number"
+          id="profit"
+          name="profit"
+          placeholder="Profit"
+          class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p id="profit-in-words" class="text-xs text-blue-600 italic mt-1"></p>
+      </div>
+
+      <!-- Withdraw -->
+      <div class="flex flex-col col-span-1">
+        <input
+          type="number"
+          id="withdraw"
+          name="withdraw"
+          placeholder="Withdraw"
+          class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p id="withdraw-in-words" class="text-xs text-blue-600 italic mt-1"></p>
+      </div>
+
+      <!-- Total (Disabled) -->
       <input
         type="number"
         id="total"
         name="total"
         placeholder="Total"
-        class="p-2 border bg-gray-100"
+        class="p-2 border rounded bg-gray-100 text-gray-600"
         disabled
       />
-      <input
-        type="number"
-        id="loan"
-        name="loan"
-        placeholder="Loan"
-        class="p-2 border"
-      />
-      <input
-        type="number"
-        id="instalment"
-        name="instalment"
-        placeholder="Instalment"
-        class="p-2 border"
-      />
+
+      <!-- Loan Input + Words -->
+      <div class="flex flex-col col-span-1">
+        <input
+          type="number"
+          id="loan"
+          name="loan"
+          placeholder="Loan"
+          class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p id="loan-in-words" class="text-xs text-blue-600 italic mt-1"></p>
+      </div>
+
+      <!-- Instalment Input + Words -->
+      <div class="flex flex-col col-span-1">
+        <input
+          type="number"
+          id="instalment"
+          name="instalment"
+          placeholder="Instalment"
+          class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p
+          id="instalment-in-words"
+          class="text-xs text-blue-600 italic mt-1"
+        ></p>
+      </div>
+
+      <!-- Instalment No -->
       <input
         type="number"
         id="instalment_no"
         name="instalment_no"
         placeholder="Instalment No."
-        class="p-2 border"
+        class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
+
+      <!-- Instalment Due -->
       <input
         type="number"
         id="instalment_due"
         name="instalment_due"
         placeholder="Instalment Due"
-        class="p-2 border bg-gray-100"
+        class="p-2 border rounded bg-gray-100 text-gray-600"
         readonly
       />
+
+      <!-- Receive Date -->
       <input
         type="date"
         id="receive_date"
         name="receive_date"
-        class="p-2 border"
+        class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
+
+      <!-- Receiver -->
       <input
         type="text"
         id="receiver"
         name="receiver"
         placeholder="Receiver"
-        class="p-2 border"
+        class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
+
+      <!-- Message -->
       <input
         type="text"
         id="message"
         name="message"
         placeholder="Message"
-        class="p-2 border"
+        class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
+
       <input type="hidden" id="rowId" name="id" />
-      <button class="col-span-full bg-blue-600 text-white py-2">Submit</button>
+
+      <!-- Submit Button -->
+      <button
+        class="col-span-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
+      >
+        Submit
+      </button>
     </form>
 
     <!-- Search + Last Total + Last Loan -->
@@ -168,214 +225,345 @@
     </div>
 
     <script>
-            const scriptURL =
-              "https://script.google.com/macros/s/AKfycbyHzHUEp6b_j0QMnsIQTLO_UPH2QH4DpkZ1b3yajlmiya3QI9WnfDP4308xO2JwYkgABA/exec";
+      const scriptURL =
+        "https://script.google.com/macros/s/AKfycbyHzHUEp6b_j0QMnsIQTLO_UPH2QH4DpkZ1b3yajlmiya3QI9WnfDP4308xO2JwYkgABA/exec";
 
-            const form = document.getElementById("savings-form");
-            const table = document.getElementById("data-table");
-            const total = document.getElementById("total");
-            const savings = document.getElementById("savings");
-            const profit = document.getElementById("profit");
-            const withdraw = document.getElementById("withdraw");
-            const inst = document.getElementById("instalment");
-            const instNo = document.getElementById("instalment_no");
-            const loan = document.getElementById("loan");
-            const instDue = document.getElementById("instalment_due");
-            const receiveDate = document.getElementById("receive_date");
-            const month = document.getElementById("month");
-            const search = document.getElementById("search");
-            const clearSearch = document.getElementById("clearSearch");
+      const form = document.getElementById("savings-form");
+      const table = document.getElementById("data-table");
+      const total = document.getElementById("total");
+      const savings = document.getElementById("savings");
+      const profit = document.getElementById("profit");
+      const withdraw = document.getElementById("withdraw");
+      const inst = document.getElementById("instalment");
+      const instNo = document.getElementById("instalment_no");
+      const loan = document.getElementById("loan");
+      const instDue = document.getElementById("instalment_due");
+      const receiveDate = document.getElementById("receive_date");
+      const month = document.getElementById("month");
+      const search = document.getElementById("search");
+      const clearSearch = document.getElementById("clearSearch");
 
-            // Month dropdown and default
-            const months = [
-              "January",
-              "February",
-              "March",
-              "April",
-              "May",
-              "June",
-              "July",
-              "August",
-              "September",
-              "October",
-              "November",
-              "December",
-            ];
-            month.innerHTML = months.map((m) => `<option>${m}</option>`).join("");
-            month.value = months[new Date().getMonth()];
+      // Month input default as "June 2025"
+      const now = new Date();
+      const monthsText = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      const defaultMonthYear = `${
+        monthsText[now.getMonth()]
+      } ${now.getFullYear()}`;
+      month.value = defaultMonthYear;
 
-            // Default receive date GMT+6
-            const offsetDate = new Date(new Date().getTime() + 6 * 60 * 60 * 1000)
-              .toISOString()
-              .split("T")[0];
-            receiveDate.value = offsetDate;
+      // Default receive date GMT+6
+      const offsetDate = new Date(new Date().getTime() + 6 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0];
+      receiveDate.value = offsetDate;
 
-            // Auto calculate Total and Instalment Due
-            [savings, profit, withdraw, inst, instNo, loan].forEach((input) => {
-              input.addEventListener("input", () => {
-                const s = parseFloat(savings.value) || 0;
-                const p = parseFloat(profit.value) || 0;
-                const w = parseFloat(withdraw.value) || 0;
-                const t = window.lastTotal || 0;
-                total.value = (t + s + p - w).toFixed(2);
+      // Auto calculate Total and Instalment Due
+      [savings, profit, withdraw, inst, instNo, loan].forEach((input) => {
+        input.addEventListener("input", () => {
+          const s = parseFloat(savings.value) || 0;
+          const p = parseFloat(profit.value) || 0;
+          const w = parseFloat(withdraw.value) || 0;
+          const t = window.lastTotal || 0;
+          total.value = (t + s + p - w).toFixed(2);
 
-                const i = parseFloat(inst.value) || 0;
-                const n = parseInt(instNo.value) || 0;
-                const lastLoan = window.lastLoan || 0;
-                instDue.value = (window.lastLoan - i * n).toFixed(2);
-              });
-            });
+          const i = parseFloat(inst.value) || 0;
+          const n = parseInt(instNo.value) || 0;
+          const lastLoan = window.lastLoan || 0;
+          instDue.value = (window.lastLoan - i * n).toFixed(2);
+        });
+      });
 
-            // Submit
-            form.addEventListener("submit", (e) => {
-              e.preventDefault();
-              const formData = new FormData(form);
-              const isUpdate = formData.get("id"); // If there's an id, it's an update
+      // Show Loan amount in words
+      loan.addEventListener("input", () => {
+        const loanValue = parseInt(loan.value) || 0;
+        const inWords = numberToWords(loanValue);
+        document.getElementById("loan-in-words").textContent = loanValue
+          ? `${inWords}`
+          : "";
+      });
 
-              formData.append("action", isUpdate ? "update" : "create");
-              formData.append("receive_date", receiveDate.value);
+      inst.addEventListener("input", () => {
+        const instValue = parseInt(inst.value) || 0;
+        const inWords = numberToWords(instValue);
+        document.getElementById("instalment-in-words").textContent = instValue
+          ? `${inWords}`
+          : "";
+      });
 
-              fetch(scriptURL, {
-                method: "POST",
-                body: formData,
-              }).then(() => {
-                form.reset();
-                instDue.value = document.getElementById("lastInstDueDisplay").value;
-                document.getElementById("rowId").value = ""; // clear the hidden id field
-                loadData();
-              });
-            });
+      savings.addEventListener("input", () => {
+        const savingsValue = parseInt(savings.value) || 0;
+        const inWords = numberToWords(savingsValue);
+        document.getElementById("savings-in-words").textContent = savingsValue
+          ? `${inWords}`
+          : "";
+      });
 
-            // Load data
-            async function loadData() {
-              const res = await fetch(`${scriptURL}?action=read`);
-              const data = await res.json();
-              data.sort((a, b) => months.indexOf(a.month) - months.indexOf(b.month));
-              const rows = data
-                .map((row) => {
-                  return `<tr class="border-t">
-                      <td>${row.month}</td><td>${parseFloat(row.savings || 0).toFixed(
-                    2
-                  )}</td>
-            <td>${parseFloat(row.profit || 0).toFixed(2)}</td><td>${parseFloat(
-                    row.withdraw || 0
-                  ).toFixed(2)}</td><td>${parseFloat(row.total || 0).toFixed(2)}</td>
-                      <td>${parseFloat(row.loan || 0)}</td><td>${parseFloat(
-                    row.instalment || 0
-                  ).toFixed(2)}</td><td>${parseFloat(
-                    row.instalment_no || 0
-                  )}</td><td>${parseFloat(row.instalment_due || 0).toFixed(2)}</td>
-                      <td>${row.receive_date}</td><td>${row.receiver}</td><td>${
-                    row.message
-                  }</td>
-                      <td>
-              <button class="text-blue-600 mr-2" onclick='editRow(${JSON.stringify(
-                row
-              )})'>Edit</button>
-              <button class="text-red-600" onclick="deleteRow('${
-                row.id
-              }')">Delete</button>
-            </td>
+      profit.addEventListener("input", () => {
+        const profitValue = parseInt(profit.value) || 0;
+        const inWords = numberToWords(profitValue);
+        document.getElementById("profit-in-words").textContent = profitValue
+          ? `${inWords}`
+          : "";
+      });
 
-                    </tr>`;
-                })
-                .join("");
-              table.innerHTML = rows;
+      withdraw.addEventListener("input", () => {
+        const withdrawValue = parseInt(withdraw.value) || 0;
+        const inWords = numberToWords(withdrawValue);
+        document.getElementById("withdraw-in-words").textContent = withdrawValue
+          ? `${inWords}`
+          : "";
+      });
 
-              if (data.length) {
-                const last = data[data.length - 1];
-                window.lastTotal = parseFloat(last.total) || 0;
+      // Submit
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const isUpdate = formData.get("id"); // If there's an id, it's an update
 
-                // Set Last Total input field
-                document.getElementById("lastTotalDisplay").value =
-                  window.lastTotal.toFixed(2);
+        formData.append("action", isUpdate ? "update" : "create");
+        formData.append("receive_date", receiveDate.value);
 
+        fetch(scriptURL, {
+          method: "POST",
+          body: formData,
+        }).then(() => {
+          form.reset();
+          instDue.value = document.getElementById("lastInstDueDisplay").value;
+          document.getElementById("rowId").value = ""; // clear the hidden id field
+          loadData();
+        });
+      });
 
-               // Set Last Loan info (most recent non-zero loan)
-                const lastNonZeroLoanRow = [...data]
-                  .reverse()
-                  .find((row) => parseFloat(row.loan) > 0);
-                if (lastNonZeroLoanRow) {
-                  window.lastLoan = parseFloat(lastNonZeroLoanRow.loan);
-                  document.getElementById("lastLoanDisplay").value =
-                    window.lastLoan.toFixed(2);
-                } else {
-                  window.lastLoan = 0;
-                  document.getElementById("lastLoanDisplay").value = "0.00";
-                }
+      // Convert number to words (Indian Numbering System)
+      function numberToWords(num) {
+        const a = [
+          "",
+          "One",
+          "Two",
+          "Three",
+          "Four",
+          "Five",
+          "Six",
+          "Seven",
+          "Eight",
+          "Nine",
+          "Ten",
+          "Eleven",
+          "Twelve",
+          "Thirteen",
+          "Fourteen",
+          "Fifteen",
+          "Sixteen",
+          "Seventeen",
+          "Eighteen",
+          "Nineteen",
+        ];
+        const b = [
+          "",
+          "",
+          "Twenty",
+          "Thirty",
+          "Forty",
+          "Fifty",
+          "Sixty",
+          "Seventy",
+          "Eighty",
+          "Ninety",
+        ];
 
-                // Set the most recent Instalment Due (last row value)
-                const lastInstDue =
-                  parseFloat(data[data.length - 1].instalment_due) || 0;
-                document.getElementById("lastInstDueDisplay").value =
-                  lastInstDue.toFixed(2);
+        if (num === 0) return "Zero";
+        if (num > 99999999) return "Too large";
 
-                // Fill the form field as default
-                instDue.value = lastInstDue.toFixed(2);
+        function convert(n) {
+          if (n < 20) return a[n];
+          if (n < 100)
+            return b[Math.floor(n / 10)] + (n % 10 ? " " + a[n % 10] : "");
+          if (n < 1000)
+            return (
+              a[Math.floor(n / 100)] +
+              " Hundred" +
+              (n % 100 ? " and " + convert(n % 100) : "")
+            );
+          if (n < 100000)
+            return (
+              convert(Math.floor(n / 1000)) +
+              " Thousand" +
+              (n % 1000 ? " " + convert(n % 1000) : "")
+            );
+          if (n < 10000000)
+            return (
+              convert(Math.floor(n / 100000)) +
+              " Lakh" +
+              (n % 100000 ? " " + convert(n % 100000) : "")
+            );
+          return (
+            convert(Math.floor(n / 10000000)) +
+            " Crore" +
+            (n % 10000000 ? " " + convert(n % 10000000) : "")
+          );
+        }
 
-               } else{
-                window.lastTotal = 0;
-                window.lastLoan = 0;
-                document.getElementById("lastTotalDisplay").value = "0.00";
-                document.getElementById("lastLoanDisplay").value = "0.00";
-                document.getElementById("lastInstDueDisplay").value = "0.00";
+        return convert(num);
+      }
 
-                
-              }
-              // Clear form field as well
-                //instDue.value = "0.00";
-                instDue.value = "Instalment Due";
-            }
-            
+      // Formats an ISO date (e.g. Google Sheets value) to "June 2025"
+      function formatMonth(dateString) {
+        const date = new Date(dateString);
+        if (isNaN(date)) return dateString; // fallback if it's already text
+        const options = {
+          month: "long",
+          year: "numeric",
+          timeZone: "Asia/Dhaka",
+        };
+        return date.toLocaleDateString("en-US", options);
+      }
 
-            // Edit
-            function editRow(row) {
-              document.getElementById("rowId").value = row.id;
-              month.value = row.month;
-              savings.value = row.savings;
-              profit.value = row.profit;
-              withdraw.value = row.withdraw;
-              loan.value = row.loan;
-              inst.value = row.instalment;
-              instNo.value = row.instalment_no;
-              instDue.value = row.instalment_due;
-              receiveDate.value = formatDate(row.receive_date);
-              document.getElementById("receiver").value = row.receiver;
-              document.getElementById("message").value = row.message;
+      // Load Data function
+      async function loadData() {
+        const res = await fetch(`${scriptURL}?action=read`);
+        let data = await res.json();
 
-              // Trigger input to recalculate totals
-              savings.dispatchEvent(new Event("input"));
-            }
-            // Date format
-            function formatDate(dateStr) {
-              const d = new Date(dateStr);
-              if (isNaN(d)) return ""; // fallback for invalid dates
-              const offset = d.getTime() + 6 * 60 * 60 * 1000; // Add GMT+6
-              return new Date(offset).toISOString().split("T")[0];
-            }
+        // 1️⃣ Sort all entries chronologically (by date)
+        data.sort(
+          (a, b) => new Date(a.receive_date) - new Date(b.receive_date)
+        );
 
-            // Delete
-            function deleteRow(id) {
-              fetch(`${scriptURL}?action=delete&id=${id}`).then(loadData);
-            }
+        // 2️⃣ Dedupe: keep only the latest entry per unique month
+        const unique = [];
+        const seen = new Set();
+        for (const row of data.reverse()) {
+          const key = row.month;
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(row);
+          }
+        }
+        unique.reverse(); // back to ascending
 
-            // Search
-            search.addEventListener("input", () => {
-              const val = search.value.toLowerCase();
-              document.querySelectorAll("#data-table tr").forEach((row) => {
-                row.style.display = row.innerText.toLowerCase().includes(val)
-                  ? ""
-                  : "none";
-              });
-              clearSearch.classList.toggle("hidden", !val);
-            });
+        // Show all unique entries (or limit to last 12 if needed)
+        const toShow = unique; // or unique.slice(-12) if you want only 12 months
 
-            clearSearch.addEventListener("click", () => {
-              search.value = "";
-              search.dispatchEvent(new Event("input"));
-            });
+        // Render table rows
+        table.innerHTML = toShow
+          .map(
+            (row) => `
+      <tr class="border-t">
+        <td>${formatMonth(row.month)}</td>
+        <td>${parseFloat(row.savings || 0).toFixed(2)}</td>
+        <td>${parseFloat(row.profit || 0).toFixed(2)}</td>
+        <td>${parseFloat(row.withdraw || 0).toFixed(2)}</td>
+        <td>${parseFloat(row.total || 0).toFixed(2)}</td>
+        <td>${parseFloat(row.loan || 0)}</td>
+        <td>${parseFloat(row.instalment || 0).toFixed(2)}</td>
+        <td>${parseFloat(row.instalment_no || 0)}</td>
+        <td>${parseFloat(row.instalment_due || 0).toFixed(2)}</td>
+        <td>${row.receive_date}</td>
+        <td>${row.receiver}</td>
+        <td>${row.message}</td>
+        <td>
+          <button class="text-blue-600 mr-2" onclick='editRow(${JSON.stringify(
+            row
+          )})'>Edit</button>
+          <button class="text-red-600" onclick="deleteRow('${
+            row.id
+          }')">Delete</button>
+        </td>
+      </tr>
+    `
+          )
+          .join("");
 
-            loadData();
+        // 4️⃣ Update summary fields based on the most recent entry
+        const last = toShow[toShow.length - 1];
+        window.lastTotal = parseFloat(last.total) || 0;
+        document.getElementById("lastTotalDisplay").value =
+          window.lastTotal.toFixed(2);
+
+        const lastLoanRow = [...toShow]
+          .reverse()
+          .find((r) => parseFloat(r.loan) > 0);
+        window.lastLoan = lastLoanRow ? parseFloat(lastLoanRow.loan) : 0;
+        document.getElementById("lastLoanDisplay").value =
+          window.lastLoan.toFixed(2);
+
+        const lastInstRow = [...toShow]
+          .reverse()
+          .find((r) => parseFloat(r.instalment_due) > 0);
+
+        const lastInstDue = lastInstRow
+          ? parseFloat(lastInstRow.instalment_due)
+          : 0;
+        document.getElementById("lastInstDueDisplay").value =
+          lastInstDue.toFixed(2);
+        instDue.value = lastInstDue.toFixed(2);
+      }
+
+      // Edit
+      function editRow(row) {
+        document.getElementById("rowId").value = row.id;
+        // month.value = row.month;
+        const date = new Date(row.month);
+        const formattedMonth =
+          monthsText[date.getMonth()] + " " + date.getFullYear();
+        month.value = formattedMonth;
+
+        savings.value = row.savings;
+        profit.value = row.profit;
+        withdraw.value = row.withdraw;
+        loan.value = row.loan;
+        inst.value = row.instalment;
+        instNo.value = row.instalment_no;
+        instDue.value = row.instalment_due;
+        receiveDate.value = formatDate(row.receive_date);
+        document.getElementById("receiver").value = row.receiver;
+        document.getElementById("message").value = row.message;
+
+        // Trigger input to recalculate totals
+        savings.dispatchEvent(new Event("input"));
+      }
+      // Date format
+      function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d)) return ""; // fallback for invalid dates
+        const offset = d.getTime() + 6 * 60 * 60 * 1000; // Add GMT+6
+        return new Date(offset).toISOString().split("T")[0];
+      }
+
+      // Delete
+      function deleteRow(id) {
+        fetch(`${scriptURL}?action=delete&id=${id}`).then(loadData);
+      }
+
+      // Search
+      search.addEventListener("input", () => {
+        const val = search.value.toLowerCase();
+        document.querySelectorAll("#data-table tr").forEach((row) => {
+          row.style.display = row.innerText.toLowerCase().includes(val)
+            ? ""
+            : "none";
+        });
+        clearSearch.classList.toggle("hidden", !val);
+      });
+
+      clearSearch.addEventListener("click", () => {
+        search.value = "";
+        search.dispatchEvent(new Event("input"));
+      });
+
+      loadData();
     </script>
   </body>
 </html>
