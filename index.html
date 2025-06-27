@@ -282,7 +282,10 @@
           const i = parseFloat(inst.value) || 0;
           const n = parseInt(instNo.value) || 0;
           const lastLoan = window.lastLoan || 0;
-          instDue.value = (window.lastLoan - i * n).toFixed(2);
+
+          const calculatedDue = lastLoan - i * n;
+          instDue.value =
+            Math.abs(calculatedDue) < 0.01 ? "0.00" : calculatedDue.toFixed(2);
         });
       });
 
