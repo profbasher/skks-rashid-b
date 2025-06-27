@@ -230,7 +230,7 @@
 
     <script>
       const scriptURL =
-        "https://script.google.com/macros/s/AKfycbyHzHUEp6b_j0QMnsIQTLO_UPH2QH4DpkZ1b3yajlmiya3QI9WnfDP4308xO2JwYkgABA/exec";
+        "https://script.google.com/macros/s/AKfycbyx7ZiakBXN6EPzEshRbjLNnHn34LEe9N0knNUU9-knpLPQDJ2HGu-cQIW3ekTerwuavA/exec";
 
       const form = document.getElementById("savings-form");
       const table = document.getElementById("data-table");
@@ -273,45 +273,87 @@
         .toISOString()
         .split("T")[0];
       receiveDate.value = offsetDate;
+     
 
-      // Auto calculate Total and Instalment Due
-      [savings, profit, withdraw, inst, instNo, loan].forEach((input) => {
+
+      [inst, instNo].forEach((input) => {
         input.addEventListener("input", () => {
-          // const s = parseFloat(savings.value) || 0;
-          // const p = parseFloat(profit.value) || 0;
-          // const w = parseFloat(withdraw.value) || 0;
-          // const t = window.lastTotal || 0;
-          // total.value = (t + s + p - w).toFixed(2);
-
-          // const i = parseFloat(inst.value) || 0;
-          // const n = parseInt(instNo.value) || 0;
-          // const lastLoan = window.lastLoan || 0;
-          // instDue.value = (window.lastLoan - i * n).toFixed(2);
-
-          const s = parseFloat(savings.value) || 0;
-          const p = parseFloat(profit.value) || 0;
-          const w = parseFloat(withdraw.value) || 0;
-          const t = window.lastTotal || 0;
-          total.value = (t + s + p - w).toFixed(2);
-
           const i = parseFloat(inst.value) || 0;
           const n = parseInt(instNo.value) || 0;
           const lastLoan = window.lastLoan || 0;
-
           let lastInstDue = 0;
-          const rawLastInstDue =
-            document.getElementById("lastInstDueDisplay").value;
 
-          // Handle "Fully Paid" case gracefully
-          if (!isNaN(parseFloat(rawLastInstDue))) {
-            lastInstDue = parseFloat(rawLastInstDue);
+          // Get previous instalment due from the previous row of the table
+          const rows = Array.from(table.querySelectorAll("tr"));
+          const currentMonthValue = month.value.trim().toLowerCase();
+
+          let previousRow = null;
+          for (let i = 0; i < rows.length - 1; i++) {
+            const nextMonth = rows[i + 1].children[0]?.textContent
+              ?.trim()
+              ?.toLowerCase();
+            if (nextMonth === currentMonthValue) {
+              previousRow = rows[i];
+              break;
+            }
           }
 
-          if (i === 0 && n === 0) {
-            instDue.value = lastInstDue.toFixed(2);
+          if (previousRow) {
+            const prevInstDueCell = previousRow.children[8]; // 9th column
+            lastInstDue = parseFloat(prevInstDueCell.textContent) || 0;
           } else {
-            instDue.value = (lastLoan - i * n).toFixed(2);
+            lastInstDue =
+              parseFloat(document.getElementById("lastInstDueDisplay").value) ||
+              0;
           }
+
+          // Final single logic block
+          if (i === 0 && n === 0) {
+            instDue.value = "0.00";
+          } else {
+            const newDue = lastInstDue - i * n;
+            instDue.value = (newDue > 0 ? newDue : 0).toFixed(2);
+          }
+        });
+      });
+
+      [savings, profit, withdraw].forEach((input) => {
+        input.addEventListener("input", () => {
+          const s = parseFloat(savings.value) || 0;
+          const p = parseFloat(profit.value) || 0;
+          const w = parseFloat(withdraw.value) || 0;
+
+
+          // Get previous total from the immediate previous month row
+          let previousTotal = 0;
+          const rows = Array.from(table.querySelectorAll("tr"));
+          const currentMonthValue = month.value.trim().toLowerCase();
+
+          let previousRow = null;
+
+          for (let i = 0; i < rows.length - 1; i++) {
+            const thisMonth = rows[i].children[0]?.textContent
+              ?.trim()
+              ?.toLowerCase();
+            const nextMonth = rows[i + 1].children[0]?.textContent
+              ?.trim()
+              ?.toLowerCase();
+
+            // If current input month matches next row's month, then this row is the immediate previous
+            if (nextMonth === currentMonthValue) {
+              previousRow = rows[i];
+              break;
+            }
+          }
+
+          // Get total from that immediate previous row
+          if (previousRow) {
+            const totalCell = previousRow.children[4]; // 5th column = Total
+            const totalValue = parseFloat(totalCell.textContent) || 0;
+            previousTotal = totalValue;
+          }
+
+          total.value = (previousTotal + s + p - w).toFixed(2);
         });
       });
 
@@ -363,14 +405,58 @@
         const isUpdate = formData.get("id"); // If there's an id, it's an update
 
         formData.append("action", isUpdate ? "update" : "create");
-        formData.append("receive_date", receiveDate.value);
+        //formData.append("receive_date", receiveDate.value);
+        // Ensure current instalment_due field is correctly set in formData
+        //formData.set("instalment_due", instDue.value);
+        //formData.set("instalment_due", (parseFloat(instDue.value) || 0).toFixed(2));
+
+        // Recalculate instalment_due manually before setting it in formData
+        const i = parseFloat(inst.value) || 0;
+        const n = parseInt(instNo.value) || 0;
+        let lastInstDue = 0;
+
+        // Find previous instalment_due from table OR hidden field
+        const rows = Array.from(table.querySelectorAll("tr"));
+        const currentMonthValue = month.value.trim().toLowerCase();
+
+        let previousRow = null;
+        for (let i = 0; i < rows.length - 1; i++) {
+          const nextMonth = rows[i + 1].children[0]?.textContent
+            ?.trim()
+            ?.toLowerCase();
+          if (nextMonth === currentMonthValue) {
+            previousRow = rows[i];
+            break;
+          }
+        }
+
+        if (previousRow) {
+          const prevInstDueCell = previousRow.children[8]; // 9th column
+          lastInstDue = parseFloat(prevInstDueCell.textContent) || 0;
+        } else {
+          lastInstDue =
+            parseFloat(document.getElementById("lastInstDueDisplay").value) ||
+            0;
+        }
+
+        let computedInstDue = 0;
+        if (i === 0 && n === 0) {
+          computedInstDue = 0;
+        } else {
+          computedInstDue = lastInstDue - i * n;
+          if (computedInstDue < 0) computedInstDue = 0;
+        }
+
+        formData.set("instalment_due", computedInstDue.toFixed(2));
+
+        formData.set("receive_date", receiveDate.value);
 
         fetch(scriptURL, {
           method: "POST",
           body: formData,
         }).then(() => {
           form.reset();
-          instDue.value = document.getElementById("lastInstDueDisplay").value;
+          //instDue.value = document.getElementById("lastInstDueDisplay").value;
           document.getElementById("rowId").value = ""; // clear the hidden id field
           loadData();
         });
@@ -540,21 +626,14 @@
         if (lastLoanRow && lastInstRow) {
           const lastInst = parseFloat(lastInstRow.instalment) || 0;
           const lastInstNo = parseInt(lastInstRow.instalment_no) || 0;
-          const paidAmount = lastInst * lastInstNo;
-
-          // Show 0.00 only in lastInstDueDisplay if fully paid
-          if (window.lastLoan === paidAmount) {
-            document.getElementById("lastInstDueDisplay").value = "0.00";
-          } else {
-            lastInstDue = window.lastLoan - paidAmount;
-            document.getElementById("lastInstDueDisplay").value =
-              lastInstDue.toFixed(2);
-          }
-        } else {
-          document.getElementById("lastInstDueDisplay").value = "0.00";
+          lastInstDue = window.lastLoan - lastInst * lastInstNo;
         }
 
-        instDue.value = lastInstDue.toFixed(2);
+        // ✅ Only update display field
+        document.getElementById("lastInstDueDisplay").value =
+          lastInstDue.toFixed(2);
+
+        // ❌ Do NOT set instDue.value here
       }
 
       // Edit
