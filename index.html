@@ -30,6 +30,7 @@
           id="savings"
           name="savings"
           placeholder="Savings"
+          value="500"
           class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <p id="savings-in-words" class="text-xs text-blue-600 italic mt-1"></p>
@@ -88,6 +89,7 @@
           id="instalment"
           name="instalment"
           placeholder="Instalment"
+          value="4000"
           class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <p
@@ -129,6 +131,7 @@
         id="receiver"
         name="receiver"
         placeholder="Receiver"
+        value="rashid"
         class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
@@ -138,6 +141,7 @@
         id="message"
         name="message"
         placeholder="Message"
+        value="paid"
         class="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
@@ -273,6 +277,17 @@
       // Auto calculate Total and Instalment Due
       [savings, profit, withdraw, inst, instNo, loan].forEach((input) => {
         input.addEventListener("input", () => {
+          // const s = parseFloat(savings.value) || 0;
+          // const p = parseFloat(profit.value) || 0;
+          // const w = parseFloat(withdraw.value) || 0;
+          // const t = window.lastTotal || 0;
+          // total.value = (t + s + p - w).toFixed(2);
+
+          // const i = parseFloat(inst.value) || 0;
+          // const n = parseInt(instNo.value) || 0;
+          // const lastLoan = window.lastLoan || 0;
+          // instDue.value = (window.lastLoan - i * n).toFixed(2);
+
           const s = parseFloat(savings.value) || 0;
           const p = parseFloat(profit.value) || 0;
           const w = parseFloat(withdraw.value) || 0;
@@ -282,7 +297,21 @@
           const i = parseFloat(inst.value) || 0;
           const n = parseInt(instNo.value) || 0;
           const lastLoan = window.lastLoan || 0;
-          instDue.value = (window.lastLoan - i * n).toFixed(2);
+
+          let lastInstDue = 0;
+          const rawLastInstDue =
+            document.getElementById("lastInstDueDisplay").value;
+
+          // Handle "Fully Paid" case gracefully
+          if (!isNaN(parseFloat(rawLastInstDue))) {
+            lastInstDue = parseFloat(rawLastInstDue);
+          }
+
+          if (i === 0 && n === 0) {
+            instDue.value = lastInstDue.toFixed(2);
+          } else {
+            instDue.value = (lastLoan - i * n).toFixed(2);
+          }
         });
       });
 
@@ -507,7 +536,7 @@
           return i > 0 && n > 0;
         });
 
-                let lastInstDue = 0;
+        let lastInstDue = 0;
         if (lastLoanRow && lastInstRow) {
           const lastInst = parseFloat(lastInstRow.instalment) || 0;
           const lastInstNo = parseInt(lastInstRow.instalment_no) || 0;
@@ -515,11 +544,11 @@
 
           // Show 0.00 only in lastInstDueDisplay if fully paid
           if (window.lastLoan === paidAmount) {
-            //document.getElementById("lastInstDueDisplay").value = "0.00";
-            document.getElementById("lastInstDueDisplay").value = "Fully Paid";
+            document.getElementById("lastInstDueDisplay").value = "0.00";
           } else {
             lastInstDue = window.lastLoan - paidAmount;
-            document.getElementById("lastInstDueDisplay").value = lastInstDue.toFixed(2);
+            document.getElementById("lastInstDueDisplay").value =
+              lastInstDue.toFixed(2);
           }
         } else {
           document.getElementById("lastInstDueDisplay").value = "0.00";
