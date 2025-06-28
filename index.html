@@ -273,15 +273,13 @@
         .toISOString()
         .split("T")[0];
       receiveDate.value = offsetDate;
-     
-
 
       [inst, instNo].forEach((input) => {
         input.addEventListener("input", () => {
           const i = parseFloat(inst.value) || 0;
           const n = parseInt(instNo.value) || 0;
-          const lastLoan = window.lastLoan || 0;
-          let lastInstDue = 0;
+          //const lastLoan = window.lastLoan || 0;
+          //let lastInstDue = 0;
 
           // Get previous instalment due from the previous row of the table
           const rows = Array.from(table.querySelectorAll("tr"));
@@ -298,22 +296,32 @@
             }
           }
 
-          if (previousRow) {
+          /*if (previousRow) {
             const prevInstDueCell = previousRow.children[8]; // 9th column
             lastInstDue = parseFloat(prevInstDueCell.textContent) || 0;
           } else {
             lastInstDue =
               parseFloat(document.getElementById("lastInstDueDisplay").value) ||
               0;
+          }*/
+          // Get the last non-zero loan from the most recent previous row
+          let lastLoan = 0;
+          if (previousRow) {
+            const loanCell = previousRow.children[5]; // 6th column = Loan
+            lastLoan = parseFloat(loanCell.textContent) || 0;
+          } else {
+            lastLoan =
+              parseFloat(document.getElementById("lastLoanDisplay").value) || 0;
           }
 
           // Final single logic block
-          if (i === 0 && n === 0) {
-            instDue.value = "0.00";
-          } else {
-            const newDue = lastInstDue - i * n;
+          //if (i === 0 && n === 0) {
+            //instDue.value = "0.00";
+          //} else {
+            //const newDue = lastInstDue - i * n;
+            const newDue = lastLoan - i * n;
             instDue.value = (newDue > 0 ? newDue : 0).toFixed(2);
-          }
+          
         });
       });
 
@@ -322,7 +330,6 @@
           const s = parseFloat(savings.value) || 0;
           const p = parseFloat(profit.value) || 0;
           const w = parseFloat(withdraw.value) || 0;
-
 
           // Get previous total from the immediate previous month row
           let previousTotal = 0;
